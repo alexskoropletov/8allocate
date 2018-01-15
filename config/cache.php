@@ -47,6 +47,7 @@ return [
         'file' => [
             'driver' => 'file',
             'path' => storage_path('framework/cache/data'),
+            'expires_at' => 60
         ],
 
         'memcached' => [

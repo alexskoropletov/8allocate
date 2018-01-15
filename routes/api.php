@@ -13,6 +13,12 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
+
+Route::put('/customer', 'CustomerController@add')->middleware('api.token', 'api.log');
+
+Route::get('/transaction/{customerId}/{transactionId}', 'TransactionController@show')->middleware('api.token', 'api.log');
+Route::get('/transaction/{customerId?}/{amount?}/{date?}/{offset?}/{limit?}', 'TransactionController@filter')
+    ->middleware('api.token', 'api.log');
+Route::put('/transaction', 'TransactionController@add')->middleware('api.token', 'api.log');
+Route::post('/transaction', 'TransactionController@update')->middleware('api.token', 'api.log');
+Route::delete('/transaction/{id}', 'TransactionController@destroy')->middleware('api.token', 'api.log');

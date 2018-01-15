@@ -12,8 +12,9 @@ class ApiTokenSeeder extends Seeder
     public function run()
     {
         DB::table('api_tokens')->insert([
-            'secret' => str_random(20),
-            'public' => sha1(str_random(20)),
+            'user_id' => 1,
+            'secret'  => str_random(20),
+            'public'  => sha1(str_random(20)),
         ]);
     }
 }

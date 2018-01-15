@@ -40,6 +40,7 @@ class Kernel extends HttpKernel
         'api' => [
             'throttle:60,1',
             'bindings',
+            'api.token',
         ],
     ];
 
@@ -57,5 +58,8 @@ class Kernel extends HttpKernel
         'can' => \Illuminate\Auth\Middleware\Authorize::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
+        'api.token' => \App\Http\Middleware\CheckApiToken::class,
+        'api.log' => \App\Http\Middleware\LogApiRequest::class,
+        'api.cache' => \App\Http\Middleware\CacheApiResponse::class,
     ];
 }
