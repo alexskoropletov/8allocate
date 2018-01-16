@@ -7,6 +7,10 @@ use Illuminate\Http\Request;
 
 class CustomerController extends Controller
 {
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function add(Request $request)
     {
         $result = [
@@ -21,6 +25,17 @@ class CustomerController extends Controller
             $customer->save();
             $result['result'] = $customer->id;
         }
+
+        return response()->json($result);
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function filter(Request $request)
+    {
+        $result['result'] = Customer::all();
 
         return response()->json($result);
     }

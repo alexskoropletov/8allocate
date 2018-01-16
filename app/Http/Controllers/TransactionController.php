@@ -28,7 +28,7 @@ class TransactionController extends Controller
             $result['transactionId'] = $transaction->id;
             $result['customerId'] = $transaction->customer->id;
             $result['amount'] = $transaction->amount;
-            $result['date'] = $transaction->updated_at;
+            $result['date'] = $transaction->updated_at->format(config('app.date_format'));
         }
 
         return response()->json($result);
@@ -52,7 +52,7 @@ class TransactionController extends Controller
             $result['transactionId'] = $transaction->id;
             $result['customerId'] = $transaction->customer->id;
             $result['amount'] = $transaction->amount;
-            $result['date'] = $transaction->updated_at;
+            $result['date'] = $transaction->updated_at->format(config('app.date_format'));
         }
 
         return response()->json($result);
@@ -85,13 +85,12 @@ class TransactionController extends Controller
             'result' => 'error',
         ];
 
-
         if ($transaction = Transaction::find($transactionId)) {
             if ($transaction->customer->id == $customerId) {
                 $result['result'] = 'OK';
                 $result['transactionId'] = $transaction->id;
                 $result['amount'] = $transaction->amount;
-                $result['date'] = $transaction->updated_at;
+                $result['date'] = $transaction->updated_at->format(config('app.date_format'));
             }
         }
 
@@ -106,20 +105,34 @@ class TransactionController extends Controller
      * @param int $limit
      * @return \Illuminate\Http\JsonResponse
      */
-    public function filter($customerId = false, $amount = false, $date = false, $offset = 0, $limit = 10)
+    public function filter($customerId = 0, $amount = 0, $date = '', $offset = 0, $limit = 5)
     {
-        $list = Transaction::take($limit)->skip($offset);
-        if (is_numeric($customerId)) {
-            $list->where('customer_id', $customerId);
-        }
-        if (is_numeric($amount)) {
-            $list->where('amount', $amount);
-        }
-        if ($date) {
-            $list->where('updated_at', $date);
-        }
-        $result['result'] = $list->get()->toArray();
+        $result['result'] = [];
+        $page = round($offset / $limit) + 1;
+        $list = Transaction::when($customerId && $customerId !== 'false', function($query) use ($customerId) {
+                return $query->where('customer_id', $customerId);
+            })
+            ->when(is_numeric($amount) && $amount !== 'false', function($query) use ($amount) {
+                return $query->where('amount', $amount);
+            })
+            ->when($date && $date !== 'false', function($query) use ($date) {
+                return $query->where('updated_at', $date);
+            })
+            ->paginate($limit, ['*'], 'page', $page)
+        ;
 
+        $result['total'] = $list->total();
+        $result['current_page'] = $list->currentPage();
+        $result['last_page'] = $list->lastPage();
+
+        foreach ($list as $item) {
+            $result['result'][] = [
+                'id'         => $item->id,
+                'customerId' => $item->customer->id,
+                'amount'     => $item->amount,
+                'date'       => $item->updated_at->format(config('app.date_format')),
+            ];
+        }
 
         return response()->json($result);
     }
